@@ -37,6 +37,14 @@ state current_state;
 //the current valve
 uint8_t current_valve = 0;
 
+int count = 0;
+
+void RTT_Handler(void)
+{
+	count++;
+	rtt_get_status(RTT);
+}
+
 int main (void)
 {
 	board_init();
@@ -53,9 +61,15 @@ int main (void)
 	button_init(ID_PIOA, PIOA, PIO_PA18, PIOA_IRQn, (void*) startpause_handler);
 	button_init(ID_PIOA, PIOA, PIO_PA20, PIOA_IRQn, (void*) advance_handler);
 	
+	rtt_init(RTT, 16384);
+	rtt_write_alarm_time(RTT, 5);
+	rtt_enable_interrupt(RTT, RTT_MR_ALMIEN);
+	
 	while (1)
 	{
-		update_state();
+		//update_state();
 		//print_current_state();
+		printf("%d\n", /*rtt_read_timer_value(RTT)*/count);
+		delay_ms(500);
 	}
 }
