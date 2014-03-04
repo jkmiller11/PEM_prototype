@@ -22,17 +22,20 @@ void button_init(uint32_t ul_id, Pio *p_pio, const uint32_t ul_mask, IRQn_Type I
 void onoff_handler(void)
 {
 	last_button = ONOFF;
+	update_state();
 	//printf("ONOFF\n");
 }
 
 void startpause_handler(void)
 {
 	last_button = STARTPAUSE;
+	update_state();
 	//printf("STARTPAUSE\n");
 }
 
 void advance_handler(void)
 {
 	last_button = ADVANCE;
+	update_state();
 	//printf("ADVANCE\n");
 }

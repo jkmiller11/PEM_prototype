@@ -37,12 +37,17 @@ state current_state;
 //the current valve
 uint8_t current_valve = 0;
 
-int count = 0;
-
 void RTT_Handler(void)
 {
-	count++;
+	//rtt_disable_interrupt(RTT, RTT_MR_RTTINCIEN);
 	rtt_get_status(RTT);
+	//count++;
+	//printf("%d\n", count);
+	if (current_state == PAUSED)
+	{
+		gpio_toggle_pin(PIO_PB27_IDX);
+	}
+	//rtt_enable_interrupt(RTT, RTT_MR_RTTINCIEN);
 }
 
 int main (void)
@@ -57,19 +62,20 @@ int main (void)
 	gpio_configure_pin(PIO_PB27_IDX,PIO_TYPE_PIO_OUTPUT_0);
 	
 	//set up the buttons
-	button_init(ID_PIOA, PIOA, PIO_PA17, PIOA_IRQn, (void*) onoff_handler);
-	button_init(ID_PIOA, PIOA, PIO_PA18, PIOA_IRQn, (void*) startpause_handler);
-	button_init(ID_PIOA, PIOA, PIO_PA20, PIOA_IRQn, (void*) advance_handler);
+	button_init(ID_PIOA, PIOA, PIO_PA17, PIOA_IRQn, (void*) onoff_handler);//arduino sda1
+	button_init(ID_PIOA, PIOA, PIO_PA18, PIOA_IRQn, (void*) startpause_handler);//arduino scl1
+	button_init(ID_PIOA, PIOA, PIO_PA20, PIOA_IRQn, (void*) advance_handler);//arduino pin 43
 	
+	rtt_disable_interrupt(RTT, RTT_MR_RTTINCIEN);
 	rtt_init(RTT, 16384);
-	rtt_write_alarm_time(RTT, 5);
-	rtt_enable_interrupt(RTT, RTT_MR_ALMIEN);
+	rtt_enable_interrupt(RTT, RTT_MR_RTTINCIEN);
+	NVIC_EnableIRQ(RTT_IRQn);
 	
 	while (1)
 	{
 		//update_state();
-		//print_current_state();
-		printf("%d\n", /*rtt_read_timer_value(RTT)*/count);
-		delay_ms(500);
+		print_current_state();
+		//printf("%d\n", /*rtt_read_timer_value(RTT)*/count);
+		delay_ms(100);
 	}
 }
