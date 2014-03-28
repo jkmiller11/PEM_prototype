@@ -14,6 +14,7 @@
 #include "serial_console.h"
 #include "state_machine.h"
 #include "shift_registers.h"
+#include "GPS.h"
 
 enum myButton {NONE, ONOFF, STARTPAUSE, ADVANCE};
 typedef enum myButton button;

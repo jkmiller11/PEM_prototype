@@ -65,4 +65,5 @@
 /** Stop bits setting */
 //#define CONF_UART_STOP_BITS    US_MR_NBSTOP_1_BIT
 
+
 #endif/* CONF_USART_SERIAL_H_INCLUDED */

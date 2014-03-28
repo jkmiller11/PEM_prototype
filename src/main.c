@@ -27,6 +27,7 @@
 #include <asf.h>
 #include "main.h"
 
+#define BUFSIZE 256
 	
 //last button that was pressed
 button last_button;
@@ -37,17 +38,21 @@ state current_state;
 //the current valve
 uint8_t current_valve = 0;
 
+extern bool registers[NUM_SHIFT_REG_PINS];
+
 void RTT_Handler(void)
 {
-	//rtt_disable_interrupt(RTT, RTT_MR_RTTINCIEN);
+	rtt_disable_interrupt(RTT, RTT_MR_RTTINCIEN);
 	rtt_get_status(RTT);
 	//count++;
 	//printf("%d\n", count);
 	if (current_state == PAUSED)
 	{
-		gpio_toggle_pin(PIO_PB27_IDX);
+		toggle_LED();
+		//shift_register_output();
+		//gpio_toggle_pin(PIO_PB27_IDX);
 	}
-	//rtt_enable_interrupt(RTT, RTT_MR_RTTINCIEN);
+	rtt_enable_interrupt(RTT, RTT_MR_RTTINCIEN);
 }
 
 int main (void)
@@ -56,6 +61,7 @@ int main (void)
 	sysclk_init();
 	serial_console_init();
 	shift_register_init();
+	gps_init();
 
 	
 	//LED
@@ -73,9 +79,24 @@ int main (void)
 	
 	while (1)
 	{
+		//shift_register_output();
 		//update_state();
-		print_current_state();
+		//print_current_state();
+		uint8_t received_bytes[BUFSIZE];
+		uint8_t first_byte;
+
+		while (usart_serial_is_rx_ready(GPS_SERIAL))
+		{
+			usart_serial_getchar(GPS_SERIAL, &first_byte);
+			if (first_byte == '$')
+			{
+				usart_serial_read_packet(GPS_SERIAL, received_bytes, BUFSIZE);
+				for (int i = 0; i < BUFSIZE; i++)
+				{
+					printf("%c", received_bytes[i]);
+				}
+			}
+		}
 		//printf("%d\n", /*rtt_read_timer_value(RTT)*/count);
-		delay_ms(100);
 	}
 }
